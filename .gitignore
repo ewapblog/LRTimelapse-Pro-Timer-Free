@@ -1,0 +1,6 @@
+# git ignore file
+*.xml
+*.atsuo
+*.vsarduino.h
+*.atsln
+*.cppproj
