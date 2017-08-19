@@ -16,7 +16,7 @@ static int DEFAULT_KEY_PIN = 0;
 // between 0 and 5 V that corresponds to the key being pressed in
 // order to use only a single input pin. The values below are from 0 to
 // 1023 because the Arduino uses a 10 bit resolution.
-/* Board introduced by G.W.   */
+/* Board introduced by G.W.   
 static int DEFAULT_THRESHOLD = 50;   // KH: changed from 5 to 50 - more tolerance
 static int UPKEY_ARV = 144; // 0.720 V, that's read "analogue read value"
 static int DOWNKEY_ARV = 329; // 1.645 V
@@ -24,6 +24,16 @@ static int LEFTKEY_ARV = 505; // 2.525 V
 static int RIGHTKEY_ARV = 0; // 0 V
 static int SELKEY_ARV = 742; // 3.710 V
 static int NOKEY_ARV = 1023; // 5.115 V
+*/
+
+/* D.Ae. Pushbuttons from a 3D-Printer  */
+static int DEFAULT_THRESHOLD = 40;   // 
+static int UPKEY_ARV = 668; // 
+static int DOWNKEY_ARV = 176; // 
+static int LEFTKEY_ARV = 92; // 
+static int RIGHTKEY_ARV = 494; // 
+static int SELKEY_ARV = 317; // 
+static int NOKEY_ARV = 992; // 
 /* */
 
 /* K.H.: My NEW Board (looks same as that one shown in project, but branded as: Open Source ELECTRONICS - Miroad
