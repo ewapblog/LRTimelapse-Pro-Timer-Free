@@ -23,9 +23,7 @@ const int UP = 3;
 const int DOWN = 4;
 const int RIGHT = 5;
 
-// const int BACK_LIGHT = 10;
-
-const float RELEASE_TIME_DEFAULT = 0.1;			// default shutter release time for camera
+const float RELEASE_TIME_DEFAULT = 0.3;			// default shutter release time for camera
 const float MIN_DARK_TIME = 0.5;
 
 const int keyRepeatRate = 100;			// when held, key repeats 1000 / keyRepeatRate times per second
@@ -53,6 +51,12 @@ float rampTo = 0.0;						// ramping interval
 unsigned long rampingStartTime = 0;		// ramping start time
 unsigned long rampingEndTime = 0;		// ramping end time
 float intervalBeforeRamping = 0;		// interval before ramping
+
+// Variables for the event based release
+long timeToRelease = 0;				// time in ms to the next release
+long timeSinceRelease = 0;				// time in ms since the last release
+unsigned long nextReleaseTime = 0;		// timestamp from the last release in ms 
+unsigned long currentMillis = 0;		// actual time
 
 boolean backLight = HIGH;				// The current settings for the backlight
 
@@ -85,12 +89,8 @@ int mode = MODE_M;            // mode: M or Bulb
 */
 void setup() {
 
-//   pinMode(BACK_LIGHT, OUTPUT);
-//   digitalWrite(BACK_LIGHT, HIGH);		// Turn backlight on.
-
   lcd.init();							// added for i2c LCD
   lcd.backlight();						// Turn backlight on.
-  //lcd.begin(16, 2);
   lcd.clear();
   lcd.setCursor(0, 0);
 
@@ -150,7 +150,8 @@ void loop() {
 
   }
   if ( isRunning ) {	// release camera, do ramping if running
-    running();
+//    running();
+		runEvent();
   }
 
 }
@@ -173,8 +174,6 @@ void processKey() {
       backLight = HIGH;
 	  lcd.backlight();				// Turn backlight on.
     }
-    //digitalWrite(BACK_LIGHT, backLight); // Turn backlight on.
-
   }
 
   // do the menu navigation
@@ -595,7 +594,7 @@ void printScreen() {
 /**
    Running, releasing Camera
 */
-void running() {
+void running() {  // not longer needed - Will be replaced with runEvent()
 
   // do this every interval only
   if ( ( millis() - previousMillis ) >=  ( ( interval * 1000 )) ) {
@@ -617,6 +616,34 @@ void running() {
 
   // do this always (multiple times per interval)
   possiblyRampInterval();
+}
+
+/**
+   runEvent will release the events on the right time
+*/
+void runEvent()
+{
+	currentMillis = millis();
+	if ( (currentMillis - previousMillis ) >=  ( ( interval * 1000 )) )
+	{
+		if ( ( maxNoOfShots != 0 ) && ( imageCount >= maxNoOfShots ) ) { // sequence is finished
+			// stop shooting
+			isRunning = 0;
+			currentMenu = SCR_DONE;
+			lcd.clear();
+			printDoneScreen(); // invoke manually
+			stopShooting();
+			} 
+			else { // is running
+			runningTime += (currentMillis - previousMillis );
+			previousMillis = currentMillis;
+			nextReleaseTime = (currentMillis + (interval * 1000));
+			releaseCamera();
+			imageCount++;
+		}
+	} 
+	timeToRelease = nextReleaseTime - currentMillis;
+	timeSinceRelease = currentMillis - previousMillis;
 }
 
 /**
