@@ -4,3 +4,9 @@
 *.vsarduino.h
 *.atsln
 *.cppproj
+*.buildinfo
+*.a
+*.d
+*.o
+*.elf
+*.hex

@@ -7,13 +7,14 @@
   Version 0.88: Thanks for Klaus Heiss (KH) for implementing the dynamic key rate
 */
 
-#include <LiquidCrystal.h>
+#include <Wire.h>						// i2c 
+#include <LiquidCrystal_I2C.h>			// LCD with i2c
 #include "LCD_Keypad_Reader.h"			// credits to: http://www.hellonull.com/?p=282
 
 const String CAPTION = "Pro-Timer 0.88";
 
 LCD_Keypad_Reader keypad;
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);	//Pin assignments for SainSmart LCD Keypad Shield
+LiquidCrystal_I2C lcd(0x20,16,2);		// i2c address and size of the LCD
 
 const int NONE = 0;						// Key constants
 const int SELECT = 1;
@@ -22,7 +23,7 @@ const int UP = 3;
 const int DOWN = 4;
 const int RIGHT = 5;
 
-const int BACK_LIGHT = 10;
+// const int BACK_LIGHT = 10;
 
 const float RELEASE_TIME_DEFAULT = 0.1;			// default shutter release time for camera
 const float MIN_DARK_TIME = 0.5;
@@ -84,10 +85,12 @@ int mode = MODE_M;            // mode: M or Bulb
 */
 void setup() {
 
-  pinMode(BACK_LIGHT, OUTPUT);
-  digitalWrite(BACK_LIGHT, HIGH);		// Turn backlight on.
+//   pinMode(BACK_LIGHT, OUTPUT);
+//   digitalWrite(BACK_LIGHT, HIGH);		// Turn backlight on.
 
-  lcd.begin(16, 2);
+  lcd.init();							// added for i2c LCD
+  lcd.backlight();						// Turn backlight on.
+  //lcd.begin(16, 2);
   lcd.clear();
   lcd.setCursor(0, 0);
 
@@ -164,10 +167,14 @@ void processKey() {
   if ( localKey == SELECT ) {
     if ( backLight == HIGH ) {
       backLight = LOW;
-    } else {
+	  lcd.noBacklight();			// Turn backlight off.
+    } 
+	else {
       backLight = HIGH;
+	  lcd.backlight();				// Turn backlight on.
     }
-    digitalWrite(BACK_LIGHT, backLight); // Turn backlight on.
+    //digitalWrite(BACK_LIGHT, backLight); // Turn backlight on.
+
   }
 
   // do the menu navigation
