@@ -39,7 +39,7 @@ float releaseTime = RELEASE_TIME_DEFAULT;			        // Shutter release time for 
 unsigned long previousMillis = 0;		// Timestamp of last shutter release
 unsigned long runningTime = 0;
 
-float interval = 4.0;					// the current interval
+float interval = 120.0;					// the current interval
 long maxNoOfShots = 0;
 int isRunning = 0;						// flag indicates intervalometer is running
 unsigned long bulbReleasedAt = 0;
@@ -100,6 +100,7 @@ void setup() {
   lcd.print( CAPTION );
 
   pinMode(12, OUTPUT);					// initialize output pin for camera release
+  pinMode(10, OUTPUT);
 
   delay(2000);							// wait a moment...
 
@@ -181,17 +182,44 @@ void processKey() {
 
     case SCR_INTERVAL:
 
-      if ( localKey == UP ) {
-        interval = (float)((int)(interval * 10) + 1) / 10; // round to 1 decimal place
-        if ( interval > 99 ) { // no intervals longer as 99secs - those would scramble the display
-          interval = 99;
-        }
+      if ( localKey == UP ) 
+	  {
+			if (interval < 10) // increase with 0.1 increments
+			{
+				interval = (float)((int)(interval * 10) + 1) / 10; // round to 1 decimal place
+			}
+			else if (interval < 100) // increase with 1.0 increments
+			{
+				interval = (float)((int)(interval * 10) + 10) / 10; // round to 1 decimal place
+			}
+			else // increase with 10.0 increments
+			{
+				interval = (float)((int)(interval * 10) + 100) / 10; // round to 1 decimal place
+			}
+			
+			if ( interval > 999 ) 
+			{ // no intervals longer as 999secs 
+				interval = 999;
+			}
       }
 
-      if ( localKey == DOWN ) {
-        if ( interval > 0.2) {
-          interval = (float)((int)(interval * 10) - 1) / 10; // round to 1 decimal place
-        }
+      if ( localKey == DOWN ) 
+	  {
+		  	if (interval < 10) // decrease with 0.1 increments
+		  	{
+			  	if ( interval > 0.2) 
+				{
+				interval = (float)((int)(interval * 10) - 1) / 10; // round to 1 decimal place
+				}
+		  	}
+		  	else if (interval < 100) // decrease with 1.0 increments
+		  	{
+			  	interval = (float)((int)(interval * 10) - 10) / 10; // round to 1 decimal place
+		  	}
+		  	else // decrease with 10.0 increments
+		  	{
+			  	interval = (float)((int)(interval * 10) - 100) / 10; // round to 1 decimal place
+		  	}
       }
 
       if ( localKey == RIGHT ) {
@@ -638,8 +666,16 @@ void runEvent()
 			runningTime += (currentMillis - previousMillis );
 			previousMillis = currentMillis;
 			nextReleaseTime = (currentMillis + (interval * 1000));
+			
+			// Temporary for testing
+			digitalWrite(10, HIGH);
+			
 			releaseCamera();
 			imageCount++;
+			
+			// Temporary for testing
+			delay(2000);
+			digitalWrite(10, LOW);
 		}
 	} 
 	timeToRelease = nextReleaseTime - currentMillis;
@@ -828,7 +864,15 @@ void printRunningScreen() {
   } else {
     lcd.print( " " );
   }
-  lcd.print( printFloat( interval, 4, 1 ) );
+  if (interval < 10)
+  {
+	  lcd.print( printFloat( interval, 4, 1 ) );
+  }
+  else
+  {
+	  lcd.print( printFloat( interval, 3, 0 ) );
+  }
+  
 }
 
 void printDoneScreen() {
